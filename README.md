@@ -13,14 +13,12 @@
 - [Acknowledgements](#acknowledgements)
 
 ## Introduction
-Phishing Domain Detector is a Python-based tool designed to identify and flag potentially malicious domains. Phishing attacks are a significant threat, and this tool aims to provide an additional layer of security by detecting suspicious domains using machine learning algorithms and heuristic techniques.
+Phishing Domain Detector is a Python-based tool designed to identify and flag potentially malicious domains based on the browsing history from Google Chrome. The tool checks if a visited site mimics a legitimate site like Instagram to alert the user of potential phishing.
 
 ## Features
-- **Domain Analysis:** Analyze domain names to detect phishing attempts.
-- **Machine Learning:** Utilize machine learning models for improved accuracy.
-- **Heuristic Checks:** Implement heuristic checks to complement ML predictions.
-- **Command Line Interface:** Easy-to-use CLI for quick domain checks.
-- **Customizable:** Easily extend the tool with additional features and checks.
+- **Browser History Access:** Access and read the latest URL from Google Chrome's browsing history.
+- **Real-time Detection:** Check if the visited site mimics a legitimate site like Instagram.
+- **Alert System:** Alert the user if a phishing page is detected.
 
 ## Installation
 To install the Phishing Domain Detector, follow these steps:
@@ -41,3 +39,59 @@ To install the Phishing Domain Detector, follow these steps:
     ```bash
     pip install -r requirements.txt
     ```
+
+4. **Set Up Alert Script (Optional):**
+   Create a `alert.vbs` file on your desktop with the following content:
+    ```vbs
+    x=msgbox("Phishing alert! This page may not be legitimate.", 0+48, "Phishing Alert")
+    ```
+
+## Usage
+To use the Phishing Domain Detector, run the following Python script:
+
+```python
+import shutil
+import tempfile
+import os
+import sqlite3
+import requests as r
+import time as t
+
+while True:
+    t.sleep(0)
+    chrome_history_path = "C:\\Users\\k.s.varun chandra\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History"
+    temp_dir = tempfile.mkdtemp()
+    temp_db_path = os.path.join(temp_dir, 'temp_history.db')
+    shutil.copy(chrome_history_path, temp_db_path)
+
+    conn = sqlite3.connect(temp_db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT url FROM urls ORDER BY last_visit_time DESC LIMIT 1")
+    result = cursor.fetchone()
+
+    url = result[0]
+    print(url)
+
+    decode = r.get(url)
+    output = decode.text
+
+    url_1 = 'https://www.instagram.com/'
+    decode_1 = r.get(url_1)
+    insta_1 = decode_1.text
+
+    if 'instagram' in output:
+        x = 1
+        print(x)
+        if x == 1:
+            if output[0:20] == insta_1[0:20]:
+                y = 1
+                print(y,' its a real instagram page ')
+            else:
+                y = 0
+                print(y)
+                if y == 0:
+                    alert_path = 'C:\\Users\\k.s.varun chandra\\Desktop\\alert.vbs'
+                    print('pyphishing page bro')
+                    os.startfile(alert_path)
+    else:
+        print('0')
